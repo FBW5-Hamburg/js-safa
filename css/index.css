@@ -4,8 +4,24 @@
     box-sizing: border-box;
 }
 
-#canvas {
+#canvasContainer {
+    width: 500px;
+    height: 400px;
+    position: relative;
     border: 1px solid black;
-    display: block;
-    margin: 0 auto;
+    /* background-image: url(../imgs/ocean.jpg);
+    background-size: cover;  */
+}
+
+#paddleCanvas {
+    position: absolute;
+    z-index: 1;
+}
+#ballCanvas {
+    position: absolute;
+    z-index: 2;
+}
+#briksCanvas {
+    position: absolute;
+    z-index: 3;
 }
