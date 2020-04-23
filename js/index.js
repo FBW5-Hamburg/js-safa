@@ -1,3 +1,12 @@
+var life = 3
+
+var score = 0
+var scoreAdd = 10
+
+
+var level = 1
+const maxLevel = 3
+
 window.onload = () => {
     //SELECT CANVAS elements
     const paddleCanvas = document.querySelector('#paddleCanvas')
@@ -16,9 +25,10 @@ window.onload = () => {
     const paddleWidth = 100
     const paddleHeight = 30
     const marginBottom = 10
-    let life = 3
-    let score = 0
-    let scoreAdd = 10
+
+
+
+    let GAME_OVER = false
 
 
     //First write the constant values like the width and height of the ball
@@ -46,7 +56,7 @@ window.onload = () => {
 
     //set the properties of the Bricks
     let brick = {
-        row: 4,
+        row: 1,
         column: 6,
         width: 55,
         height: 20,
@@ -59,28 +69,50 @@ window.onload = () => {
     drawPaddle(context1, paddle)
     movePaddle(context1, paddle, paddleCanvas)
 
-    let bricks = []
-    createBricks(context3, brick, bricks)
+
     //drawBall(context,ball)
     //setInterval(moveBall, ball.speed);
-    setInterval(() => {
+    let loop = setInterval(() => {
         context2.clearRect(0, 0, ballCanvas.width, ballCanvas.height);
-        
+        //backgroundImage(context)
+
+        //drawPaddle(context1, paddle)
         drawBall(context2, ball)
 
-        ballWallCollision(ball, ballCanvas, paddle)
+
+        ballWallCollision(ball, ballCanvas, paddle,loop)
         ballPaddleCollision(ball, paddle)
 
-        
+        ballBricksCollision(context3, brick, bricks, ball, score, scoreAdd)
+
         ball.x += ball.dx
         ball.y += ball.dy
-        ballBricksCollision(brick,bricks,ball,score,scoreAdd)
+
+
+        //show score
+        showGameStatus(context2, score, 35, 25, './imgs/score.png', 5, 5, 25, 25)
+        //show lives
+        showGameStatus(context2, life, paddleCanvas.width - 25, 25, './imgs/life.png', paddleCanvas.width - 55, 5, 25, 25)
+        //gameOver(GAME_OVER)
+
+        //     if (GAME_OVER ) {
+        //         clearInterval(loop)
+        // }
+        //show level
+        showGameStatus(context2, level, paddleCanvas.width / 2, 25, './imgs/level.png', paddleCanvas.width / 2, 5, 25, 25)
+
+
+        levelUp(context3, brick, bricks, GAME_OVER, ball, paddle, ballCanvas)
+        //gameOver(GAME_OVER)
+        
+
     }, 10);
 
-    //ballWallCollision(ball,canvas)
-    //ballWallCollision(ball,canvas)
-    
-    
+    let bricks = []
+    createBricks(context3, brick, bricks)
+    // if (gameOver(GAME_OVER)) {
+    //     clearInterval(loop)
+    // }
 
 }
 
@@ -131,7 +163,7 @@ function drawBall(context2, ball) {
 }
 
 //BALL AND WALL DETECTION
-function ballWallCollision(ball, ballCanvas, paddle) {
+function ballWallCollision(ball, ballCanvas, paddle,loop) {
 
     if (ball.x + ball.dx + ball.radius > ballCanvas.width || ball.x + ball.dx - ball.radius < 0) {
         ball.dx = -ball.dx
@@ -142,7 +174,15 @@ function ballWallCollision(ball, ballCanvas, paddle) {
         ball.dy = -ball.dy
     }
     if (ball.y + ball.radius > ballCanvas.height) {
+        life--
+        console.log(life);
+
         resetBall(ball, paddle, ballCanvas)
+        if (life <= 0) {
+             
+            //document.location.reload();
+            clearInterval(loop);
+        }
     }
 }
 
@@ -203,6 +243,8 @@ function createBricks(context3, brick, bricks) {
                 img1.addEventListener('load', function () {
                     context3.drawImage(img1, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
                 })
+            } else {
+
             }
 
         }
@@ -211,25 +253,77 @@ function createBricks(context3, brick, bricks) {
     }
 }
 
-function ballBricksCollision(brick,bricks,ball,score,scoreAdd) {
+function ballBricksCollision(context3, brick, bricks, ball) {
+
     for (let r = 0; r < brick.row; r++) {
         for (let c = 0; c < brick.column; c++) { //to create the columns
             let b = bricks[r][c]
-            console.log(b);
-            
+            //console.log(b);
+
             if (b.status) {
-                if ((ball.x + ball.radius > b.x) && (ball.x - ball.radius < b.x + brick.width) &&
-                    (ball.y + ball.radius > b.y) && (ball.y - ball.radius < b.y + brick.width)) {
-                    
+                if ((ball.x + ball.radius > b.x) && (ball.x - ball.radius < b.x + brick.width) && (ball.y + ball.radius > b.y) && (ball.y - ball.radius < b.y + brick.height)) {
+                    context3.clearRect(bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
                     b.status = false
-                    console.log(b.status);
+                    // //console.log(b.status);
                     ball.dy = -ball.dy
-                    
+
                     score += scoreAdd
+                    // console.log('crash');
+
+
                 }
+
             }
 
         }
+    }
+}
+
+//show the score and life
+function showGameStatus(context1, text, textX, textY, image_source, imgX, imgY, imgWidth, imgHeight) {
+    //draw text
+    //context1.fillStyle = '#FFF'
+    context1.font = '25px Germania One'
+    context1.fillText(text, textX, textY)
+    console.log(text);
+
+    //draw image
+    // let img2 = document.createElement('img')
+    // img2.src = image_source
+
+    // //create onload events for img to add it inside convas after loading
+    // img2.addEventListener('load', function () {
+    //     context1.drawImage(img2, imgX,imgY, imgWidth, imgHeight)
+    // })
+}
+
+//game over
+// function gameOver(GAME_OVER) {
+//     if (life <= 0) {
+//         GAME_OVER = true
+//         //alert('you lost')
+//     }
+// }
+
+function levelUp(context3, brick, bricks, GAME_OVER, ball, paddle, ballCanvas) {
+    let isLevelDone = true
+
+    for (let r = 0; r < brick.row; r++) {
+        for (let c = 0; c < brick.column; c++) { //to create the columns
+            isLevelDone = isLevelDone && !bricks[r][c].status
+
+        }
+    }
+    if (isLevelDone) {
+        if (level >= maxLevel) {
+            GAME_OVER = true
+            return
+        }
+        brick.row++
+        createBricks(context3, brick, bricks)
+        ball.speed += 0.5
+        resetBall(ball, paddle, ballCanvas)
+        level++
 
     }
 }
