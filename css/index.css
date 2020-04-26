@@ -5,8 +5,8 @@
 }
 
 #canvasContainer {
-    width: 500px;
-    height: 400px;
+    width: 750px;
+    height: 500px;
     position: relative;
     border: 1px solid black;
     /* background-image: url(../imgs/ocean.jpg);
