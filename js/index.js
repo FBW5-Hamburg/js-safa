@@ -264,6 +264,7 @@ function ballBricksCollision(context3, brick, bricks, ball) {
                 if ((ball.x + ball.radius > b.x) && (ball.x - ball.radius < b.x + brick.width) && (ball.y + ball.radius > b.y) && (ball.y - ball.radius < b.y + brick.height)) {
                     context3.clearRect(bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
                     b.status = false
+                    alert('hi')
                     // //console.log(b.status);
                     ball.dy = -ball.dy
 

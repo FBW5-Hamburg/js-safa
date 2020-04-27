@@ -1,7 +1,4 @@
 window.onload = function () {
-    //get canvas elements
-    let animationCanvas = document.querySelector('#briksCanvas')
-    let context = animationCanvas.getContext('2d')
 
     //SELECT CANVAS elements
     const paddleCanvas = document.querySelector('#paddleCanvas')
@@ -9,6 +6,9 @@ window.onload = function () {
 
     const ballCanvas = document.querySelector('#ballCanvas')
     const context2 = ballCanvas.getContext('2d')
+
+    let bricksCanvas = document.querySelector('#briksCanvas')
+    let context3 = bricksCanvas.getContext('2d')
 
 
     /////////////////////////
@@ -18,8 +18,11 @@ window.onload = function () {
     const paddleWidth = 100
     const paddleHeight = 30
     const marginBottom = 10
-//First write the constant values like the width and height of the ball
-let ballRadius = 8
+    //First write the constant values like the width and height of the ball
+    let ballRadius = 8
+    //BRICKS VARIABLES
+    let bricks = []
+    //bricks[0]='empty'
 
     //Second set the properties of the paddle
     let paddle = {
@@ -40,68 +43,22 @@ let ballRadius = 8
 
     }
 
-    let delpinBrick = {
-        row: 1,
-        column: 8,
-        width: 55,
-        height: 20,
-        offSetLeft: 30,
-        offSetTop: 160,
-        marginTop: 30
-    }
-
-    let delpinBricks = []
-
-    let boxBrick = {
-        row: 1,
-        column: 8,
-        width: 55,
-        height: 20,
+    //set the properties of the Bricks
+    let brick = {
+        row: 5,
+        column: 12,
+        width: 50,
+        height: 50,
         offSetLeft: 20,
-        offSetTop: 230,
-        marginTop: 30
+        offSetTop: 20,
+        marginTop: 10
     }
 
-    let boxBricks = []
-
-
-    let sharkBrick = {
-        row: 3,
-        column: 10,
-        width: 55,
-        height: 20,
-        offSetLeft: 20,
-        offSetTop: 30,
-        marginTop:10,
-        //marginLeft:100
-    }
-
-    let sharkBricks = []
-    let fishBrick = {
-        row: 1,
-        column: 8,
-        width: 55,
-        height: 20,
-        offSetLeft: 18,
-        offSetTop: 30,
-        marginTop: 50,
-        //marginLeft:100
-    }
-
-    let fishBricks = []
-
-    //CALL FUNCTIONS
-    createBricks(context, delpinBrick, delpinBricks)
-    createBoxes(context, boxBrick, boxBricks)
-    createOctopus(context)
-    createNet(context, 100, 30)
-    createNet(context, 400, 30)
-
-    createSharkBricks1(context, sharkBrick, sharkBricks)
-    createSharkBricks2(context, sharkBrick, sharkBricks) 
-
-    createFish(context, fishBrick, fishBricks)
-
+    createBoxesBricks(context3, brick, bricks)
+    createDelphinBricks(context3, brick, bricks)
+    createSharkBricks(context3, brick, bricks)
+    //createFishBricks(context3, brick, bricks)
+    // createOctopusBricks(context3, brick, bricks)
 
 
     drawPaddle(context1, paddle)
@@ -115,8 +72,9 @@ let ballRadius = 8
         drawBall(context2, ball)
 
 
-        ballWallCollision(ball, ballCanvas, paddle,loop)
+        ballWallCollision(ball, ballCanvas, paddle, loop)
         ballPaddleCollision(ball, paddle)
+        ballBricksCollision(context3, brick, bricks, ball)
 
         // ballBricksCollision(context3, brick, bricks, ball, score, scoreAdd)
 
@@ -124,83 +82,23 @@ let ballRadius = 8
         ball.y += ball.dy
 
 
-        // //show score
-        // showGameStatus(context2, score, 35, 25, './imgs/score.png', 5, 5, 25, 25)
-        // //show lives
-        // showGameStatus(context2, life, paddleCanvas.width - 25, 25, './imgs/life.png', paddleCanvas.width - 55, 5, 25, 25)
-        // //gameOver(GAME_OVER)
 
-        // //     if (GAME_OVER ) {
-        // //         clearInterval(loop)
-        // // }
-        // //show level
-        // showGameStatus(context2, level, paddleCanvas.width / 2, 25, './imgs/level.png', paddleCanvas.width / 2, 5, 25, 25)
+        //ballBricksCollision(context, boxBrick, boxBricks, ball)
+        //ballBricksCollision(context, delpinBrick, delpinBricks, ball)
+        //ballBricksCollision1(context, sharkBrick, sharkBricks, ball)
+        //ballBricksCollision(context, fishBrick, fishBricks, ball)
 
 
-        // levelUp(context3, brick, bricks, GAME_OVER, ball, paddle, ballCanvas)
-        //gameOver(GAME_OVER)
-        
+    }, 20);
+    console.log(bricks);
 
-    }, 10);
 }
 
-//DRAW THE MOVING DELPHIN
-function drawDelphin(ctx, xImg, yImage) {
-    //create Image
-    let img = document.createElement('img')
-    img.src = './imgs/delphin.png'
-
-    img.addEventListener('load', function () { //load because we create the image so it will take time to be onload
-
-        let imgCounter = 9
-        setInterval(() => {
-
-            //clear drawing area (x,  y, width, height)
-            ctx.clearRect(xImg, yImage, 84, 68)
-            ctx.drawImage(img, imgCounter, 547.8, 84, 68, xImg, yImage, 84, 68)
-            imgCounter += 84
-
-            if (imgCounter == 345) {
-                imgCounter = 343.2
-            }
-            if (imgCounter == 427.2) {
-                imgCounter = 9
-            }
-
-        }, 175);
+// //DRAW BOXES
+function createBoxesBricks(ctx, brick, bricks) {
 
 
-    })
-}
-
-
-//CREATE A LIGNE OF MOVING DELPHINS
-function createBricks(ctx, brick, bricks) {
-
-    for (let r = 0; r < brick.row; r++) { //to create the rows
-        bricks[r] = [];
-        for (let c = 0; c < brick.column; c++) { //to create the columns
-            bricks[r][c] = {
-                x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
-                y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
-                status: true //that mean that the brick is not destroyed
-            }
-
-            if (bricks[r][c].status) {
-                drawDelphin(ctx, bricks[r][c].x, bricks[r][c].y)
-            }
-
-        }
-
-
-    }
-}
-
-//DRAW BOXES
-function createBoxes(ctx, brick, bricks) {
-
-
-    for (let r = 0; r < brick.row; r++) { //to create the rows
+    for (let r = 4; r < brick.row; r++) { //to create the rows
         bricks[r] = [];
         for (let c = 0; c < brick.column; c++) { //to create the columns
             bricks[r][c] = {
@@ -216,9 +114,56 @@ function createBoxes(ctx, brick, bricks) {
                 imgBox.addEventListener('load', function () { //load because we create the image so it will take time to be onload
 
 
-                    ctx.drawImage(imgBox, bricks[r][c].x, bricks[r][c].y, 50, 50)
+                    ctx.drawImage(imgBox, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
 
-                    //ctx.drawImage(imgBox, 30, 270, 50, 50)
+                })
+            }
+
+        }
+
+
+    }
+}
+
+
+
+//CREATE A LIGNE OF MOVING DELPHINS
+function createDelphinBricks(ctx, brick, bricks) {
+
+    for (let r = 3; r < brick.row - 1; r++) { //to create the rows
+        bricks[r] = [];
+        for (let c = 0; c < brick.column; c++) { //to create the columns
+            bricks[r][c] = {
+                x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
+                y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
+                status: true //that mean that the brick is not destroyed
+            }
+
+            if (bricks[r][c].status) {
+
+                //create Image
+                let img = document.createElement('img')
+                img.src = './imgs/delphin.png'
+
+                img.addEventListener('load', function () { //load because we create the image so it will take time to be onload
+
+                    let imgCounter = 9
+                    let brickInterval = setInterval(() => {
+
+                        //clear drawing area (x,  y, width, height)
+                        ctx.clearRect(bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
+                        ctx.drawImage(img, imgCounter, 547.8, 84, 68, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
+                        imgCounter += 84
+
+                        if (imgCounter == 345) {
+                            imgCounter = 343.2
+                        }
+                        if (imgCounter == 427.2) {
+                            imgCounter = 9
+                        }
+
+                    }, 300);
+                    bricks[r][c].interval = brickInterval
 
 
                 })
@@ -230,76 +175,13 @@ function createBoxes(ctx, brick, bricks) {
     }
 }
 
-//Draw an Octopus
-function createOctopus(ctx, Ximg, Yimg) {
-    let imgOctopus = document.createElement('img')
-    imgOctopus.src = './imgs/oct.png'
-
-    imgOctopus.addEventListener('load', function () { //load because we create the image so it will take time to be onload
 
 
-        ctx.drawImage(imgOctopus, 300, 80, 100, 100)
-
-        //ctx.drawImage(imgBox, 30, 270, 50, 50)
-
-
-    })
-}
-
-//CREATE FISH NET
-function createNet(ctx, Ximg, Yimg) {
-    let imgFishNet = document.createElement('img')
-    imgFishNet.src = './imgs/fishnet.png'
-
-    imgFishNet.addEventListener('load', function () { //load because we create the image so it will take time to be onload
-
-
-        ctx.drawImage(imgFishNet, Ximg, Yimg, 200, 150)
-
-        //ctx.drawImage(imgBox, 30, 270, 50, 50)
-
-
-    })
-}
-
-//CREATE FISH NET
-function createShark(ctx, xImg, yImage) {
-    let imgShark = document.createElement('img')
-    imgShark.src = './imgs/shark.png'
-
-    imgShark.addEventListener('load', function () { //load because we create the image so it will take time to be onload
-
-        let imgCounter = 0
-        setInterval(() => {
-
-            //clear drawing area (x,  y, width, height)
-            ctx.clearRect(xImg, yImage, 50, 50)
-            //ctx.drawImage(img, imgCounter, 557, 84, 68, xImg, yImage, 84, 68)
-            ctx.drawImage(imgShark, imgCounter, 562, 156, 130, xImg, yImage, 50, 50)
-            imgCounter += 156
-
-            if (imgCounter == 1226) {
-                imgCounter = 0
-            }
-            if (imgCounter == 624) {
-                imgCounter = 620
-            }
-            if (imgCounter == 776) {
-                imgCounter = 758
-            }
-
-
-
-        }, 500);
-
-
-    })
-}
 
 //CREATE OF MOVING SHARK
-function createSharkBricks1(ctx, brick, bricks) {
+function createSharkBricks(ctx, brick, bricks) {
 
-    for (let r = 0; r < brick.row; r++) { //to create the rows
+    for (let r = 1; r < brick.row - 2; r++) { //to create the rows
         bricks[r] = [];
         for (let c = 0; c < r; c++) { //to create the columns
             bricks[r][c] = {
@@ -309,72 +191,145 @@ function createSharkBricks1(ctx, brick, bricks) {
             }
 
             if (bricks[r][c].status) {
-                
-                createShark(ctx, bricks[r][c].x, bricks[r][c].y) 
-            }
-
-        }
 
 
-    }
-}
+                let imgShark = document.createElement('img')
+                imgShark.src = './imgs/shark.png'
 
-//CREATE OF MOVING SHARK
-function createSharkBricks2(ctx, brick, bricks) {
+                imgShark.addEventListener('load', function () { //load because we create the image so it will take time to be onload
 
-    for (let r = 1; r < brick.row; r++) { //to create the rows
-        bricks[r] = [];
-        for (let c = 8; c < brick.column; c++) { //to create the columns
-            bricks[r][c] = {
-                x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
-                y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
-                status: true //that mean that the brick is not destroyed
-            }
+                    let imgCounter = 0
+                    let brickInterval1 = setInterval(() => {
 
-            if (bricks[r][c].status ) {
-                if (r*c!=8) {
-                    createShark(ctx, bricks[r][c].x, bricks[r][c].y) 
-                }
-                    
-                
-                
-            }
+                        //clear drawing area (x,  y, width, height)
+                        ctx.clearRect(bricks[r][c].x, bricks[r][c].y, 50, 50)
+                        //ctx.drawImage(img, imgCounter, 557, 84, 68, xImg, yImage, 84, 68)
+                        ctx.drawImage(imgShark, imgCounter, 562, 156, 130, bricks[r][c].x, bricks[r][c].y, 50, 50)
+                        imgCounter += 156
 
-        }
-    }
-}
-//CREATE THE FISH INSIDE THE NET
-function createFish(ctx, brick, bricks) {
-    for (let r = 0; r < brick.row; r++) { //to create the rows
-        bricks[r] = [];
-        for (let c = 2; c < brick.column; c++) { //to create the columns
-            bricks[r][c] = {
-                x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
-                y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
-                status: true //that mean that the brick is not destroyed
-            }
-
-            if (bricks[r][c].status) {
-                let imgFish = document.createElement('img')
-                imgFish.src = './imgs/7outa.png'
-
-                imgFish.addEventListener('load', function () { //load because we create the image so it will take time to be onload
+                        if (imgCounter == 1226) {
+                            imgCounter = 0
+                        }
+                        if (imgCounter == 624) {
+                            imgCounter = 620
+                        }
+                        if (imgCounter == 776) {
+                            imgCounter = 758
+                        }
 
 
-                    if (c != 4 && c != 5) {
-                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, 50, 50)
-                    }
 
-                    ctx.drawImage(imgFish, 190, 120, 50, 50)
-                    ctx.drawImage(imgFish, 490, 120, 50, 50)
+                    }, 300);
+
+                    bricks[r][c].interval = brickInterval1
                 })
             }
 
         }
+        for (let c = brick.column - 1; c >= 10; c--) { //to create the columns
+            if (r + c > 11) {
+                bricks[r][c] = {
+                    x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
+                    y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
+                    status: true //that mean that the brick is not destroyed
+                }
 
+                if (bricks[r][c].status) {
+
+
+                    let imgShark = document.createElement('img')
+                    imgShark.src = './imgs/shark.png'
+
+                    imgShark.addEventListener('load', function () { //load because we create the image so it will take time to be onload
+
+                        let imgCounter = 0
+                        let brickInterval2 = setInterval(() => {
+
+                            //clear drawing area (x,  y, width, height)
+                            ctx.clearRect(bricks[r][c].x, bricks[r][c].y, 50, 50)
+                            //ctx.drawImage(img, imgCounter, 557, 84, 68, xImg, yImage, 84, 68)
+                            ctx.drawImage(imgShark, imgCounter, 562, 156, 130, bricks[r][c].x, bricks[r][c].y, 50, 50)
+                            imgCounter += 156
+
+                            if (imgCounter == 1226) {
+                                imgCounter = 0
+                            }
+                            if (imgCounter == 624) {
+                                imgCounter = 620
+                            }
+                            if (imgCounter == 776) {
+                                imgCounter = 758
+                            }
+
+
+
+                        }, 300);
+
+                        bricks[r][c].interval = brickInterval2
+                    })
+                }
+            }
+
+
+        }
+
+        for (let c = 2; c < brick.column - 7; c++) { //to create the columns
+            if ((c + r == 3 || c + r == 5) || (c + r == 7 || c + r == 9)) {
+                bricks[r][c] = {
+                    x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
+                    y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
+                    status: true //that mean that the brick is not destroyed
+                }
+
+                if (bricks[r][c].status) {
+                    let imgFish = document.createElement('img')
+                    imgFish.src = './imgs/7outa.png'
+
+                    imgFish.addEventListener('load', function () { //load because we create the image so it will take time to be onload
+
+
+
+                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, 50, 50)
+
+
+
+                    })
+
+
+                }
+            }
+
+
+        }
+
+        for (let c = 7; c < brick.column - 2; c++) { //to create the columns
+            if ((c + r == 8 || c + r == 10)) {
+                bricks[r][c] = {
+                    x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
+                    y: r * (brick.offSetTop + brick.height) + brick.offSetTop + brick.marginTop,
+                    status: true //that mean that the brick is not destroyed
+                }
+
+                if (bricks[r][c].status) {
+                    let imgFish = document.createElement('img')
+                    imgFish.src = './imgs/7outa.png'
+
+                    imgFish.addEventListener('load', function () { //load because we create the image so it will take time to be onload
+
+                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, 50, 50)
+
+                    })
+
+
+                }
+            }
+
+
+        }
 
     }
 }
+
 
 //DRAW PADDLE
 function drawPaddle(context1, paddle) {
@@ -421,7 +376,7 @@ function drawBall(context2, ball) {
 }
 
 //BALL AND WALL DETECTION
-function ballWallCollision(ball, ballCanvas, paddle,loop) {
+function ballWallCollision(ball, ballCanvas, paddle, loop) {
 
     if (ball.x + ball.dx + ball.radius > ballCanvas.width || ball.x + ball.dx - ball.radius < 0) {
         ball.dx = -ball.dx
@@ -432,15 +387,15 @@ function ballWallCollision(ball, ballCanvas, paddle,loop) {
         ball.dy = -ball.dy
     }
     if (ball.y + ball.radius > ballCanvas.height) {
-        life--
-        console.log(life);
+        // life--
+        // console.log(life);
 
         resetBall(ball, paddle, ballCanvas)
-        if (life <= 0) {
-             
-            //document.location.reload();
-            clearInterval(loop);
-        }
+        // if (life <= 0) {
+
+        //     //document.location.reload();
+        //     clearInterval(loop);
+        // }
     }
 }
 
@@ -468,3 +423,34 @@ function ballPaddleCollision(ball, paddle) {
 
     }
 }
+
+function ballBricksCollision(context3, brick, bricks, ball) {
+
+    bricks.forEach((brick) => {
+        //console.log(brick);
+
+        if (brick != "empty") {
+            brick.forEach((item) => {
+                //console.log(item);
+                console.log(item);
+
+                if (item != "empty") {
+                    if (item.status) {
+                        if ((ball.x + ball.radius > item.x) && (ball.x - ball.radius < item.x + 50) && (ball.y + ball.radius > item.y) && (ball.y - ball.radius < item.y + 50)) {
+                            // console.log(bricks)
+                            // console.log("HHHH ="+ind*50)
+                            // bricks.splice(ind,1)
+                            clearInterval(item.interval)
+                            context3.clearRect(item.x, item.y, 50, 50)
+                            item.status = false
+                            ball.dy = -ball.dy
+                        }
+                    }
+                }
+            })
+        }
+    });
+
+   
+}
+
