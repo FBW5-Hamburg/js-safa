@@ -1,4 +1,19 @@
+/////////////////////////////////////////////////
+///////////     GLOBAL VARIABLES     ///////////      
+/////////////////////////////////////////////////      
+var LIFE = 3
+var SCORE = 0
+var SCORE_ADD = 10
+
+/////////////////////////////////////////////////
+///////////    PRINCIPAL PROGRAMM     ///////////      
+/////////////////////////////////////////////////
+
 window.onload = function () {
+
+    /////////////////////////////////////////////////
+    ///////////        DECLARATIONS      ///////////      
+    /////////////////////////////////////////////////       
 
     //SELECT CANVAS elements
     const paddleCanvas = document.querySelector('#paddleCanvas')
@@ -7,24 +22,37 @@ window.onload = function () {
     const ballCanvas = document.querySelector('#ballCanvas')
     const context2 = ballCanvas.getContext('2d')
 
-    let bricksCanvas = document.querySelector('#briksCanvas')
+    let bricksCanvas = document.querySelector('#bricksCanvas')
     let context3 = bricksCanvas.getContext('2d')
 
 
-    /////////////////////////
-    //CREATE THE PADDLE
-    //////////////////////////
-    //First write the constant values like the width and height of the paddle
+    //SELECT HTML ELEMENTS
+    const gameOver1 = document.querySelector('#gameOver')
+    const youWon = document.querySelector('#youWon')
+    const youLose = document.querySelector('#youLose')
+
+
+    ////////////////////////////////////////////
+    /////////         VARIABLES        /////////
+    ////////////////////////////////////////////
+
+    //PADDLES VARIABLES
     const paddleWidth = 100
     const paddleHeight = 30
     const marginBottom = 10
-    //First write the constant values like the width and height of the ball
+
+    //BALL VARIABLES
     let ballRadius = 8
+
     //BRICKS VARIABLES
     let bricks = []
-    //bricks[0]='empty'
 
-    //Second set the properties of the paddle
+
+    ///////////////////////////////////////////////
+    /////////     OBJECTS & PROPERTIES    /////////
+    ///////////////////////////////////////////////
+
+    //SET THE PADDLE PROPERTIES
     let paddle = {
         x: paddleCanvas.width / 2 - paddleWidth / 2,
         y: paddleCanvas.height - paddleHeight - marginBottom,
@@ -33,6 +61,7 @@ window.onload = function () {
         step: 20
     }
 
+    //SET THE BALL PROPERTIES
     let ball = {
         x: ballCanvas.width / 2,
         y: paddle.y - ballRadius,
@@ -43,60 +72,121 @@ window.onload = function () {
 
     }
 
-    //set the properties of the Bricks
+    //SET THE BRICKS PROPERTIES
     let brick = {
         row: 5,
         column: 12,
         width: 50,
         height: 50,
-        offSetLeft: 20,
-        offSetTop: 20,
-        marginTop: 10
+        offSetLeft: 10,
+        offSetTop: 10,
+        marginTop: 5
     }
 
-    createBoxesBricks(context3, brick, bricks)
-    createDelphinBricks(context3, brick, bricks)
-    createSharkBricks(context3, brick, bricks)
-    //createFishBricks(context3, brick, bricks)
-    // createOctopusBricks(context3, brick, bricks)
 
+    ///////////////////////////////////////////////
+    /////////        CALL FUNCTIONS       /////////
+    ///////////////////////////////////////////////
 
+    //CALL PADDLE FUNCTIONS
     drawPaddle(context1, paddle)
     movePaddle(context1, paddle, paddleCanvas)
 
-    let loop = setInterval(() => {
-        context2.clearRect(0, 0, ballCanvas.width, ballCanvas.height);
-        //backgroundImage(context)
+    //CALL BRICKS FUNCTIONS
+    createBoxesBricks(context3, brick, bricks)
+    createDelphinBricks(context3, brick, bricks)
+    createDifferentsBricks(context3, brick, bricks)
 
-        //drawPaddle(context1, paddle)
+    //CALL FISCHNET FUNCTIONS
+    createNet(context1, 70, 10)
+    createNet(context1, 370, 10)
+
+    //CALL BALL FUNCTIONS
+    //SET A LOOP FOR THE MOUVEMENT OF THE BALL
+
+    let loop = setInterval(() => {
+
+        //CLEAR THE BALL CANVAS
+        context2.clearRect(0, 0, ballCanvas.width, ballCanvas.height);
+
+        //CALL BALL FUNCTION
         drawBall(context2, ball)
 
-
-        ballWallCollision(ball, ballCanvas, paddle, loop)
+        //CALL THE COLLISION FUNCTIONS
+        ballWallCollision(ball, ballCanvas, paddle, gameOver1, youLose, loop)
         ballPaddleCollision(ball, paddle)
-        ballBricksCollision(context3, brick, bricks, ball)
+        ballBricksCollision(context3, brick, bricks, ball, gameOver1, youWon, loop)
 
-        // ballBricksCollision(context3, brick, bricks, ball, score, scoreAdd)
-
+        //SET A STEP TO THE BALL
         ball.x += ball.dx
         ball.y += ball.dy
 
+        //CALL THE OCTOPUS FUNCTIONS
+        createOctopus(context3, ball)
 
-
-        //ballBricksCollision(context, boxBrick, boxBricks, ball)
-        //ballBricksCollision(context, delpinBrick, delpinBricks, ball)
-        //ballBricksCollision1(context, sharkBrick, sharkBricks, ball)
-        //ballBricksCollision(context, fishBrick, fishBricks, ball)
-
+        //SHOW SCORE
+        showGameStatus(context2, SCORE, 35, 25, './imgs/score.png', 5, 5, 25, 25)
+        //SHOW LIVES
+        showGameStatus(context2, LIFE, paddleCanvas.width - 25, 25, './imgs/life.png', paddleCanvas.width - 55, 5, 25, 25)
 
     }, 20);
-    console.log(bricks);
 
 }
 
-// //DRAW BOXES
-function createBoxesBricks(ctx, brick, bricks) {
 
+
+/////////////////////////////////////////////////
+///////////          FUNCTIONS        ///////////      
+/////////////////////////////////////////////////
+
+//DRAW PADDLE
+function drawPaddle(context1, paddle) {
+    //create html image
+    let img = document.createElement('img')
+    //set src to the image
+    img.src = './imgs/grass.png'
+
+    //create onload events for img to add it inside convas after loading
+    img.addEventListener('load', function () {
+        context1.drawImage(img, paddle.x, paddle.y, paddle.width, paddle.height)
+    })
+}
+
+//MOVE THE PADDLE
+function movePaddle(context1, paddle, paddleCanvas) {
+
+    document.onkeydown = (e) => {
+        context1.clearRect(paddle.x, paddle.y, paddleCanvas.width, paddleCanvas.height)
+
+        if (e.key == 'ArrowRight' && paddle.x + paddle.width < paddleCanvas.width) {
+
+            paddle.x += paddle.step
+
+        } else if (e.key == 'ArrowLeft' && paddle.x > 0) {
+
+            paddle.x -= paddle.step
+
+        }
+
+        drawPaddle(context1, paddle)
+    }
+}
+
+//DRAW BALL
+function drawBall(context2, ball) {
+    context2.beginPath();
+    context2.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    context2.fillStyle = "#ffcdo5"
+    context2.fill()
+    context2.closePath();
+}
+
+/////////////////////////////
+/// DRAW DIFFRENTS BRICKS  //
+/////////////////////////////
+
+//DRAW BOXES
+function createBoxesBricks(ctx, brick, bricks) {
 
     for (let r = 4; r < brick.row; r++) { //to create the rows
         bricks[r] = [];
@@ -112,20 +202,12 @@ function createBoxesBricks(ctx, brick, bricks) {
                 imgBox.src = './imgs/box.png'
 
                 imgBox.addEventListener('load', function () { //load because we create the image so it will take time to be onload
-
-
                     ctx.drawImage(imgBox, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
-
                 })
             }
-
         }
-
-
     }
 }
-
-
 
 //CREATE A LIGNE OF MOVING DELPHINS
 function createDelphinBricks(ctx, brick, bricks) {
@@ -158,31 +240,30 @@ function createDelphinBricks(ctx, brick, bricks) {
                         if (imgCounter == 345) {
                             imgCounter = 343.2
                         }
+
+                        //RESTART THE DRAWING PROCESS EHEN WE ARRIVE TO 427.2
                         if (imgCounter == 427.2) {
                             imgCounter = 9
                         }
 
                     }, 300);
+                    //SET A PROPERTIE TO THE BRICK TO STOP IT WHEN THE BALL CRASH THE BRICK
                     bricks[r][c].interval = brickInterval
-
 
                 })
             }
-
         }
-
-
     }
 }
 
-
-
-
 //CREATE OF MOVING SHARK
-function createSharkBricks(ctx, brick, bricks) {
+function createDifferentsBricks(ctx, brick, bricks) {
 
     for (let r = 1; r < brick.row - 2; r++) { //to create the rows
         bricks[r] = [];
+
+        //FOR EACH LINE WE WILL CREATE A DIFFERENT BRICK
+        //THOSE COLUMNS WILL BE SHARK BRICK ON THE LEFT
         for (let c = 0; c < r; c++) { //to create the columns
             bricks[r][c] = {
                 x: c * (brick.offSetLeft + brick.width) + brick.offSetLeft,
@@ -191,7 +272,6 @@ function createSharkBricks(ctx, brick, bricks) {
             }
 
             if (bricks[r][c].status) {
-
 
                 let imgShark = document.createElement('img')
                 imgShark.src = './imgs/shark.png'
@@ -202,11 +282,13 @@ function createSharkBricks(ctx, brick, bricks) {
                     let brickInterval1 = setInterval(() => {
 
                         //clear drawing area (x,  y, width, height)
-                        ctx.clearRect(bricks[r][c].x, bricks[r][c].y, 50, 50)
-                        //ctx.drawImage(img, imgCounter, 557, 84, 68, xImg, yImage, 84, 68)
-                        ctx.drawImage(imgShark, imgCounter, 562, 156, 130, bricks[r][c].x, bricks[r][c].y, 50, 50)
+                        ctx.clearRect(bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
+
+                        //draw the shark image
+                        ctx.drawImage(imgShark, imgCounter, 562, 156, 130, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
                         imgCounter += 156
 
+                        //RESTART THE DRAWING PROCESS EHEN WE ARRIVE TO 427.2
                         if (imgCounter == 1226) {
                             imgCounter = 0
                         }
@@ -217,15 +299,16 @@ function createSharkBricks(ctx, brick, bricks) {
                             imgCounter = 758
                         }
 
-
-
                     }, 300);
 
+                    //SET A PROPERTIE TO THE BRICK TO STOP IT WHEN THE BALL CRASH THE BRICK
                     bricks[r][c].interval = brickInterval1
                 })
             }
 
         }
+
+        //THOSE COLUMNS WILL BE SHARK BRICK ON THE RIGHT    
         for (let c = brick.column - 1; c >= 10; c--) { //to create the columns
             if (r + c > 11) {
                 bricks[r][c] = {
@@ -236,7 +319,6 @@ function createSharkBricks(ctx, brick, bricks) {
 
                 if (bricks[r][c].status) {
 
-
                     let imgShark = document.createElement('img')
                     imgShark.src = './imgs/shark.png'
 
@@ -246,14 +328,12 @@ function createSharkBricks(ctx, brick, bricks) {
                         let brickInterval2 = setInterval(() => {
 
                             //clear drawing area (x,  y, width, height)
-                            ctx.clearRect(bricks[r][c].x, bricks[r][c].y, 50, 50)
-                            //ctx.drawImage(img, imgCounter, 557, 84, 68, xImg, yImage, 84, 68)
-                            ctx.drawImage(imgShark, imgCounter, 562, 156, 130, bricks[r][c].x, bricks[r][c].y, 50, 50)
+                            ctx.clearRect(bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
+
+                            //draw shark image
+                            ctx.drawImage(imgShark, imgCounter, 562, 156, 130, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
                             imgCounter += 156
 
-                            if (imgCounter == 1226) {
-                                imgCounter = 0
-                            }
                             if (imgCounter == 624) {
                                 imgCounter = 620
                             }
@@ -261,18 +341,20 @@ function createSharkBricks(ctx, brick, bricks) {
                                 imgCounter = 758
                             }
 
-
-
+                            //RESTART THE DRAWING PROCESS EHEN WE ARRIVE TO 1226
+                            if (imgCounter == 1226) {
+                                imgCounter = 0
+                            }
                         }, 300);
 
+                        //SET A PROPERTIE TO THE BRICK TO STOP IT WHEN THE BALL CRASH THE BRICK
                         bricks[r][c].interval = brickInterval2
                     })
                 }
             }
-
-
         }
 
+        //THOSE COLUMNS WILL BE FISH BRICK ON THE LEFT 
         for (let c = 2; c < brick.column - 7; c++) { //to create the columns
             if ((c + r == 3 || c + r == 5) || (c + r == 7 || c + r == 9)) {
                 bricks[r][c] = {
@@ -287,21 +369,14 @@ function createSharkBricks(ctx, brick, bricks) {
 
                     imgFish.addEventListener('load', function () { //load because we create the image so it will take time to be onload
 
-
-
-                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, 50, 50)
-
-
+                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
 
                     })
-
-
                 }
             }
-
-
         }
 
+        //THOSE COLUMNS WILL BE FISH BRICK ON THE RIGHT 
         for (let c = 7; c < brick.column - 2; c++) { //to create the columns
             if ((c + r == 8 || c + r == 10)) {
                 bricks[r][c] = {
@@ -316,99 +391,91 @@ function createSharkBricks(ctx, brick, bricks) {
 
                     imgFish.addEventListener('load', function () { //load because we create the image so it will take time to be onload
 
-                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, 50, 50)
+                        ctx.drawImage(imgFish, bricks[r][c].x, bricks[r][c].y, brick.width, brick.height)
 
                     })
-
-
                 }
             }
-
-
         }
 
     }
 }
 
 
-//DRAW PADDLE
-function drawPaddle(context1, paddle) {
-    //create html image
-    let img = document.createElement('img')
-    //set src to the image
-    img.src = './imgs/grass.png'
+//CREATE OF THE OCTOPUS
+function createOctopus(ctx, ball) {
+    let imgOctopus = document.createElement('img')
+    imgOctopus.src = './imgs/oct.png'
 
-    //create onload events for img to add it inside convas after loading
-    img.addEventListener('load', function () {
-        context1.drawImage(img, paddle.x, paddle.y, paddle.width, paddle.height)
+    imgOctopus.addEventListener('load', function () { //load because we create the image so it will take time to be onload
+
+        ctx.drawImage(imgOctopus, 310, 100, 100, 100)
+
+    })
+
+    //WHEN THE BALL CRASH THE OCTOPUS WILL BE SHOWEN BULLES
+    if ((ball.x + ball.radius > 380) && (ball.x - ball.radius < 380 + 100) && (ball.y + ball.radius > 100) && (ball.y - ball.radius < 100 + 100)) {
+
+        ball.dy = -ball.dy
+
+    }
+}
+
+//CREATE FISH NET
+function createNet(ctx, Ximg, Yimg) {
+    let imgFishNet = document.createElement('img')
+    imgFishNet.src = './imgs/fishnet.png'
+
+    imgFishNet.addEventListener('load', function () { 
+
+        ctx.drawImage(imgFishNet, Ximg, Yimg, 250, 200)
+
     })
 }
 
-//MOVE THE PADDLE
-function movePaddle(context1, paddle, paddleCanvas) {
-
-    document.onkeydown = (e) => {
-        context1.clearRect(paddle.x, paddle.y, paddleCanvas.width, paddleCanvas.height)
-
-        if (e.key == 'ArrowRight' && paddle.x + paddle.width < paddleCanvas.width) {
-
-            paddle.x += paddle.step
 
 
-        } else if (e.key == 'ArrowLeft' && paddle.x > 0) {
-
-            paddle.x -= paddle.step
-        }
-
-        drawPaddle(context1, paddle)
-
-    }
-}
-
-//DRAW BALL
-function drawBall(context2, ball) {
-    context2.beginPath();
-    context2.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    context2.fillStyle = "#ffcdo5"
-    context2.fill()
-    context2.closePath();
-
-}
+/////////////////////////////
+///     BALLCOLLISIONS     //
+/////////////////////////////
 
 //BALL AND WALL DETECTION
-function ballWallCollision(ball, ballCanvas, paddle, loop) {
+function ballWallCollision(ball, ballCanvas, paddle, gameOver1, youLose, loop) {
 
+    //CHECK THE CONTACT OF THE BALL WITH THE RIGHT AND LEFT WALL
     if (ball.x + ball.dx + ball.radius > ballCanvas.width || ball.x + ball.dx - ball.radius < 0) {
         ball.dx = -ball.dx
-        //console.log(ball.dx);
-
     }
+
+    //CHECK THE CONTACT OF THE BALL WITH THE TOP WALL
     if (ball.y + ball.dy - ball.radius < 0) {
         ball.dy = -ball.dy
     }
+
+    //CHECK THE CONTACT OF THE BALL WITH THE GROUND AND REDUCE THE NUMBER OF LIVES
     if (ball.y + ball.radius > ballCanvas.height) {
-        // life--
-        // console.log(life);
+        LIFE--
 
+        //EACH TIME WE RESTART ANOTHER BALL UNTIL THE LIVES ARRIVE TO 0
         resetBall(ball, paddle, ballCanvas)
-        // if (life <= 0) {
+        if (LIFE <= 0) {
+            showYouLose(gameOver1, youLose)
+            clearInterval(loop);
 
-        //     //document.location.reload();
-        //     clearInterval(loop);
-        // }
+            //AFTER 1S SHOW THE SCORE AND THE SAVE PAGE
+            // setTimeout(() => {
+            //     return window.location.assign('./endPage.html')
+            // }, 1000);
+        }
     }
 }
 
-function resetBall(ball, paddle, ballCanvas) {
-    ball.x = ballCanvas.width / 2
-    ball.y = paddle.y - ball.radius
-    ball.dx = 3 * (Math.random() * 2 - 1)
-    ball.dy = -3
-}
-
-
+//BALL AND PADDLE DETECTION
 function ballPaddleCollision(ball, paddle) {
+
+    //CHECK THE CONTACT OF THE BALL WITH THE PADDLE
     if (ball.x < paddle.x + paddle.width && ball.x > paddle.x && paddle.y < paddle.y + paddle.height && ball.y > paddle.y) { //the ball is inside the paddle
+
         //CHECK WHERE THE BALL HIT THE PADDLE
         let collidepoint = ball.x - (paddle.x + paddle.width / 2)
 
@@ -424,33 +491,111 @@ function ballPaddleCollision(ball, paddle) {
     }
 }
 
-function ballBricksCollision(context3, brick, bricks, ball) {
+//BALL AND BRICKS DETECTION
+function ballBricksCollision(context3, brick, bricks, ball, gameOver1, youWon, loop) {
 
-    bricks.forEach((brick) => {
-        //console.log(brick);
+    bricks.forEach((brick1) => {
 
-        if (brick != "empty") {
-            brick.forEach((item) => {
-                //console.log(item);
-                console.log(item);
+        //CHECK IF THE ROW IS EMPTY OR NOT
+        if (brick1 != "empty") {
+            brick1.forEach((item) => {
 
+                //CHECK IF THIS BRICK LOCAL IS EMPTY OR NOT
                 if (item != "empty") {
                     if (item.status) {
-                        if ((ball.x + ball.radius > item.x) && (ball.x - ball.radius < item.x + 50) && (ball.y + ball.radius > item.y) && (ball.y - ball.radius < item.y + 50)) {
-                            // console.log(bricks)
-                            // console.log("HHHH ="+ind*50)
-                            // bricks.splice(ind,1)
+
+                        //CHECK THE CONTACT OF THE BALL WITH THE BRICKS FROM THE 4 SIDES
+                        if ((ball.x + ball.radius > item.x) && (ball.x - ball.radius < item.x + brick.width) && (ball.y + ball.radius > item.y) && (ball.y - ball.radius < item.y + brick.height)) {
+                            //STOP THE SETINTERVAL OF THE BRICK
                             clearInterval(item.interval)
-                            context3.clearRect(item.x, item.y, 50, 50)
+
+                            //CLEAR THE BRICK LOCAL
+                            context3.clearRect(item.x, item.y, brick.width, brick.height)
+
+                            //CHANGE THE STATUS OF THE BRICK TO FALSE THAT MEAN THIS BRICK DOESNT EXIST ON THE CONTEXT
                             item.status = false
+
+                            //GO BACK EIN STEP IF THE BALL DETECTE THE BRICK
                             ball.dy = -ball.dy
+
+                            //ADD 10 TO THE SCORE WE WE CRASH A BRICK WITH THA BALL
+                            SCORE += SCORE_ADD
+
                         }
                     }
                 }
             })
         }
-    });
 
-   
+        //CHECK IF THERE IS NOT ANYMORE A BRICK ON THE CONTEXT, CALL THE END PAGE AND SHOW THE SCORE
+        if (SCORE == (bricks.length - 2) * brick1.length * 10) {
+
+            //SET THE LAST SCORE TO THE LOCAL STORAGE TO COMPARE IT WITH THE OTHERS SCORES
+            localStorage.setItem('mostRecentScore', SCORE)
+
+            //SHOW A WIN MESSAGE
+            showYouWin(gameOver1, youWon)
+
+            //STOP THE GAME
+            clearInterval(loop); // Needed for Chrome to end game
+
+            //AFTER 1S SHOW THE SCORE AND THE SAVE PAGE
+            setTimeout(() => {
+                return window.location.assign('./endPage.html')
+            }, 1000);
+        }
+    });
 }
 
+
+
+/////////////////////////////
+///     RESET THE BALL     //
+/////////////////////////////
+
+function resetBall(ball, paddle, ballCanvas) {
+    ball.x = ballCanvas.width / 2
+    ball.y = paddle.y - ball.radius
+    ball.dx = 3 * (Math.random() * 2 - 1)
+    ball.dy = -3
+}
+
+
+
+
+
+
+
+////////////////////////////
+////    SHOW  MESSAGES    //
+////////////////////////////
+//show the score and life
+function showGameStatus(context1, text, textX, textY, image_source, imgX, imgY, imgWidth, imgHeight) {
+    //draw text
+    //context1.fillStyle = '#FFF'
+    context1.font = '25px Germania One'
+    context1.fillText(text, textX, textY)
+
+}
+
+//SHOW YOU WIN
+function showYouWin(gameOver1, youWon) {
+    gameOver1.style.display = 'block'
+    youWon.style.display = 'block'
+}
+
+//SHOW YOU LOSE
+function showYouLose(gameOver1, youLose) {
+    gameOver1.style.display = 'block'
+    youLose.style.display = 'block'
+}
+
+
+
+/////////////////////////////////
+////// LOAD SOUNDS   /////////
+///////////////////////////////
+// function sound() {
+//     const wall_hit = new Audio()
+//     wall_hit.src = ''
+// }
