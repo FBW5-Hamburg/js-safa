@@ -4,6 +4,12 @@
 var LIFE = 3
 var SCORE = 0
 var SCORE_ADD = 10
+var brick_hit = new Audio()
+var life_lost= new Audio()
+var win = new Audio()
+var underwater = new Audio()
+
+
 
 /////////////////////////////////////////////////
 ///////////    PRINCIPAL PROGRAMM     ///////////      
@@ -31,6 +37,11 @@ window.onload = function () {
     const youWon = document.querySelector('#youWon')
     const youLose = document.querySelector('#youLose')
 
+    // const myAudio = document.querySelector('#myAudio')
+    // myAudio.play();
+    // const lifeLost = document.querySelector('#lifeLost')
+    // lifeLost.play();
+    // const win = document.querySelector('#win')
 
     ////////////////////////////////////////////
     /////////         VARIABLES        /////////
@@ -78,11 +89,21 @@ window.onload = function () {
         column: 12,
         width: 50,
         height: 50,
-        offSetLeft: 10,
+        offSetLeft: 5,
         offSetTop: 10,
         marginTop: 5
     }
 
+    brick_hit.src = './sounds/brick_hit.mp3'
+
+
+life_lost.src = './sounds/life_lost.mp3'
+
+
+win.src = './sounds/win.mp3'
+
+
+underwater.src = './sounds/underwater.wav'
 
     ///////////////////////////////////////////////
     /////////        CALL FUNCTIONS       /////////
@@ -98,8 +119,8 @@ window.onload = function () {
     createDifferentsBricks(context3, brick, bricks)
 
     //CALL FISCHNET FUNCTIONS
-    createNet(context1, 70, 10)
-    createNet(context1, 370, 10)
+    createNet(context1, 60, 12)
+    createNet(context1, 330, 12)
 
     //CALL BALL FUNCTIONS
     //SET A LOOP FOR THE MOUVEMENT OF THE BALL
@@ -125,12 +146,18 @@ window.onload = function () {
         createOctopus(context3, ball)
 
         //SHOW SCORE
-        showGameStatus(context2, SCORE, 35, 25, './imgs/score.png', 5, 5, 25, 25)
+        showGameStatus(context2, SCORE, 50, 40)
         //SHOW LIVES
-        showGameStatus(context2, LIFE, paddleCanvas.width - 25, 25, './imgs/life.png', paddleCanvas.width - 55, 5, 25, 25)
+        showGameStatus(context2, LIFE, paddleCanvas.width - 25, 40)
+        underwater.play()
 
     }, 20);
+    showImageStatus(context3, './imgs/score.png', 0, 5, 50, 50)
+    showImageStatus(context3, './imgs/heart.png', paddleCanvas.width - 70, 5, 50, 50)
 
+    //SHOW THE  ON THE BOTTOM
+    showImageStatus(context3, './imgs/submarin.gif', 500, 450, 100, 100)
+    //myAudio.play()
 }
 
 
@@ -401,7 +428,6 @@ function createDifferentsBricks(ctx, brick, bricks) {
     }
 }
 
-
 //CREATE OF THE OCTOPUS
 function createOctopus(ctx, ball) {
     let imgOctopus = document.createElement('img')
@@ -409,7 +435,7 @@ function createOctopus(ctx, ball) {
 
     imgOctopus.addEventListener('load', function () { //load because we create the image so it will take time to be onload
 
-        ctx.drawImage(imgOctopus, 310, 100, 100, 100)
+        ctx.drawImage(imgOctopus, 285, 80, 100, 100)
 
     })
 
@@ -426,9 +452,9 @@ function createNet(ctx, Ximg, Yimg) {
     let imgFishNet = document.createElement('img')
     imgFishNet.src = './imgs/fishnet.png'
 
-    imgFishNet.addEventListener('load', function () { 
+    imgFishNet.addEventListener('load', function () {
 
-        ctx.drawImage(imgFishNet, Ximg, Yimg, 250, 200)
+        ctx.drawImage(imgFishNet, Ximg, Yimg, 250, 180)
 
     })
 }
@@ -455,7 +481,7 @@ function ballWallCollision(ball, ballCanvas, paddle, gameOver1, youLose, loop) {
     //CHECK THE CONTACT OF THE BALL WITH THE GROUND AND REDUCE THE NUMBER OF LIVES
     if (ball.y + ball.radius > ballCanvas.height) {
         LIFE--
-
+        life_lost.play()
         //EACH TIME WE RESTART ANOTHER BALL UNTIL THE LIVES ARRIVE TO 0
         resetBall(ball, paddle, ballCanvas)
         if (LIFE <= 0) {
@@ -463,9 +489,10 @@ function ballWallCollision(ball, ballCanvas, paddle, gameOver1, youLose, loop) {
             clearInterval(loop);
 
             //AFTER 1S SHOW THE SCORE AND THE SAVE PAGE
-            // setTimeout(() => {
-            //     return window.location.assign('./endPage.html')
-            // }, 1000);
+            setTimeout(() => {
+                localStorage.setItem("mostRecentScore", SCORE);
+                return window.location.assign('./endPage.html')
+            }, 2000);
         }
     }
 }
@@ -520,6 +547,7 @@ function ballBricksCollision(context3, brick, bricks, ball, gameOver1, youWon, l
 
                             //ADD 10 TO THE SCORE WE WE CRASH A BRICK WITH THA BALL
                             SCORE += SCORE_ADD
+                            brick_hit.play()
 
                         }
                     }
@@ -539,8 +567,10 @@ function ballBricksCollision(context3, brick, bricks, ball, gameOver1, youWon, l
             //STOP THE GAME
             clearInterval(loop); // Needed for Chrome to end game
 
+            win.play()
             //AFTER 1S SHOW THE SCORE AND THE SAVE PAGE
             setTimeout(() => {
+                localStorage.setItem("mostRecentScore", SCORE);
                 return window.location.assign('./endPage.html')
             }, 1000);
         }
@@ -578,6 +608,19 @@ function showGameStatus(context1, text, textX, textY, image_source, imgX, imgY, 
 
 }
 
+function showImageStatus(context1, image_source, imgX, imgY, imgWidth, imgHeight) {
+
+    //draw image
+    let img2 = document.createElement('img')
+    img2.src = image_source
+
+    //create onload events for img to add it inside convas after loading
+    img2.addEventListener('load', function () {
+        context1.drawImage(img2, imgX, imgY, imgWidth, imgHeight)
+    })
+
+}
+
 //SHOW YOU WIN
 function showYouWin(gameOver1, youWon) {
     gameOver1.style.display = 'block'
@@ -588,6 +631,7 @@ function showYouWin(gameOver1, youWon) {
 function showYouLose(gameOver1, youLose) {
     gameOver1.style.display = 'block'
     youLose.style.display = 'block'
+    // container.style.display='none'
 }
 
 
@@ -596,6 +640,5 @@ function showYouLose(gameOver1, youLose) {
 ////// LOAD SOUNDS   /////////
 ///////////////////////////////
 // function sound() {
-//     const wall_hit = new Audio()
-//     wall_hit.src = ''
+
 // }
