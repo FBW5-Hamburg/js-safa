@@ -1,6 +1,7 @@
 window.onload = function () {
     const highScoresList = document.querySelector('#highScoresList')
     let jsonObj = localStorage.getItem('highScores')
+
     //check if there is data with the key todoList in the local storage
     if (jsonObj != null) {
         let highScores = JSON.parse(jsonObj)
@@ -13,7 +14,6 @@ window.onload = function () {
                 </li>`;
             })
             .join('')
-
 
     }
 

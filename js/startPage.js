@@ -1,14 +1,15 @@
 function animateSubmarine() {
     let startPage = document.querySelector('#startPage');
     startPage.style.visibility = 'hidden'
-    //e.style.visibility = 'hidden';
+    
     let submarine = document.querySelector('#submarine');
     let submarineWidth = 200;
     let submarineHeight = 200;
-    let start = Date.now();
-    console.log("cc");
+    let start = Date.now(); // to remember start time
+    
     let timer = setInterval(function () {
 
+        //HOW MUCH TIME PASSED FROM THE START
         let timePassed = Date.now() - start;
         submarineWidth = submarineWidth - 2.5;
         submarineHeight = submarineHeight - 2.5;
@@ -16,24 +17,17 @@ function animateSubmarine() {
         submarine.style.width = submarineWidth + 'px';
         submarine.style.height = submarineHeight + 'px';
 
-        if (submarine.style.top == '550px') {
-            submarine.style.visibility = 'hidden';
-            console.log(submarine.style.left);
-        }
-        if (timePassed > 1000) {
+        if (submarine.style.top == '400px' || timePassed > 700) {
+        
             submarine.style.visibility = 'hidden';
             clearInterval(timer);
-            
-            
             window.location.assign("./game.html");
         }
 
-    
-
     }, 20);
 }
-let submarine1= document.querySelector('#animateSubmarine');
-submarine1.addEventListener('click',function (e) {
+let subMarine1= document.querySelector('#animateSubmarine');
+subMarine1.addEventListener('click',function (e) {
     animateSubmarine()
 })
 

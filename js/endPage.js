@@ -4,7 +4,6 @@ window.onload = function () {
     const finalScore = document.querySelector('#finalScore')
     const mostRecentScore = localStorage.getItem('mostRecentScore')
     
-    //localStorage.setItem('highScores',JSON.stringify([]))
     const highScores = JSON.parse(localStorage.getItem('highScores')) || []
     const max_high_scores = 5
 
@@ -16,7 +15,7 @@ window.onload = function () {
     })
 
     saveScoreBtn.addEventListener('click', (e) => {
-        //onsole.log('clicked');
+        
         e.preventDefault()
         const score = {
             score:mostRecentScore,
@@ -29,14 +28,8 @@ window.onload = function () {
         localStorage.setItem('highScores',JSON.stringify(highScores))
 
         console.log(highScores);
-        // window.location.assign('./essai.html')
-        window.location.assign("./startPage.html");
+        window.location.assign("./index.html");
     })
 
-    
-    
-
-      
-    
 
 }

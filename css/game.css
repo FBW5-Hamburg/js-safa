@@ -3,7 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: sans-serif;
-    /* background: #ff3772; */
+    
 }
 
 /***********************/
@@ -15,11 +15,9 @@
     margin: 0 auto;
     position: relative;
     border: 1px solid black;
-    background-image: url(../imgs/3.jpg);
+    background-image: url(../imgs/bg.jpg);
     background-size: cover; 
 }
-
-
 
 
 #paddleCanvas {
@@ -35,20 +33,6 @@
     position: absolute;
     z-index: 2;
 }
-
-#waveCanvas {
-    position: absolute;
-    z-index: 2;
-}
-
-/* #sound {
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    left: 800px;
-} */
 
 #gameOver {
     position: absolute;

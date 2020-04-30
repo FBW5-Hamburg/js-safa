@@ -1,6 +1,6 @@
 @font-face {
     font-family: myFont;
-    src: url(../fonts/BreeSerif-Regular.ttf);
+    src: url(../fonts/Lobster-Regular.ttf);
 }
 * {
     margin: 0;
@@ -19,34 +19,20 @@
     margin: 0 auto;
     
     border: 1px solid black;
-    background-image: url(../imgs/3.jpg);
+    background-image: url(../imgs/bg.jpg);
     background-size: cover;
 }
 
-/* #startPage {
-    position: relative;
-    width: 450px;
-    margin: 60px auto 0;
-    padding: 20px;
-    box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, .2);
-    border-radius: 5px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-} */
-
+/**************************************/
+/* STYLE THE CONTENT OF THE CONTAINER */
+/**************************************/
 #submarine {
     width: 200px;
     height: 200px;
     display: block;
     position: relative;
     margin-left: auto;
-    /* margin-right: auto; */
+    
 }
 
 #startPage {
@@ -62,9 +48,22 @@
     top: 120px;
     left: 90px;
     font-family: myFont;
+    color: rgb(7, 7, 163);
+    font-size: 2.5em;
    
     
 }
+h2  {
+    width: 100%;
+    position: relative;
+    top: 120px;
+    left: 150px;
+    font-family: myFont;
+    color: rgb(7, 7, 163);
+    font-size: 1.5em;
+}
+
+
 /* BUTTONS */
 .btn {
     font-size: 1.5rem;

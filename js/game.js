@@ -4,11 +4,13 @@
 var LIFE = 3
 var SCORE = 0
 var SCORE_ADD = 10
+
 var brick_hit = new Audio()
-var life_lost= new Audio()
+var life_lost = new Audio()
 var win = new Audio()
 var underwater = new Audio()
 
+var step = 0; // FOR THE MOUVEMENT OF THE WAVE
 
 
 /////////////////////////////////////////////////
@@ -37,19 +39,15 @@ window.onload = function () {
     const youWon = document.querySelector('#youWon')
     const youLose = document.querySelector('#youLose')
 
-    // const myAudio = document.querySelector('#myAudio')
-    // myAudio.play();
-    // const lifeLost = document.querySelector('#lifeLost')
-    // lifeLost.play();
-    // const win = document.querySelector('#win')
+
 
     ////////////////////////////////////////////
     /////////         VARIABLES        /////////
     ////////////////////////////////////////////
 
-    //PADDLES VARIABLES
+    //PADDLE VARIABLES
     const paddleWidth = 100
-    const paddleHeight = 30
+    const paddleHeight = 100
     const marginBottom = 10
 
     //BALL VARIABLES
@@ -69,7 +67,7 @@ window.onload = function () {
         y: paddleCanvas.height - paddleHeight - marginBottom,
         width: paddleWidth,
         height: paddleHeight,
-        step: 20
+        step: 30
     }
 
     //SET THE BALL PROPERTIES
@@ -94,16 +92,13 @@ window.onload = function () {
         marginTop: 5
     }
 
+    //LOAD SOUND
     brick_hit.src = './sounds/brick_hit.mp3'
+    life_lost.src = './sounds/life_lost.mp3'
+    win.src = './sounds/win.mp3'
+    underwater.src = './sounds/underwater.wav'
 
 
-life_lost.src = './sounds/life_lost.mp3'
-
-
-win.src = './sounds/win.mp3'
-
-
-underwater.src = './sounds/underwater.wav'
 
     ///////////////////////////////////////////////
     /////////        CALL FUNCTIONS       /////////
@@ -118,13 +113,16 @@ underwater.src = './sounds/underwater.wav'
     createDelphinBricks(context3, brick, bricks)
     createDifferentsBricks(context3, brick, bricks)
 
+    //CALL THE OCTOPUS FUNCTIONS
+    createOctopus(context3)
+
     //CALL FISCHNET FUNCTIONS
     createNet(context1, 60, 12)
     createNet(context1, 330, 12)
 
+
     //CALL BALL FUNCTIONS
     //SET A LOOP FOR THE MOUVEMENT OF THE BALL
-
     let loop = setInterval(() => {
 
         //CLEAR THE BALL CANVAS
@@ -142,22 +140,23 @@ underwater.src = './sounds/underwater.wav'
         ball.x += ball.dx
         ball.y += ball.dy
 
-        //CALL THE OCTOPUS FUNCTIONS
-        createOctopus(context3, ball)
 
         //SHOW SCORE
         showGameStatus(context2, SCORE, 50, 40)
         //SHOW LIVES
         showGameStatus(context2, LIFE, paddleCanvas.width - 25, 40)
+        //UNDERWATER SOUND
         underwater.play()
 
+        draw(context2) // to draw an animated wave
+
     }, 20);
+
+    plotSine(context3, 285, step, 157, 385); // to draw a fixed wave
     showImageStatus(context3, './imgs/score.png', 0, 5, 50, 50)
     showImageStatus(context3, './imgs/heart.png', paddleCanvas.width - 70, 5, 50, 50)
 
-    //SHOW THE  ON THE BOTTOM
-    showImageStatus(context3, './imgs/submarin.gif', 500, 450, 100, 100)
-    //myAudio.play()
+
 }
 
 
@@ -171,7 +170,7 @@ function drawPaddle(context1, paddle) {
     //create html image
     let img = document.createElement('img')
     //set src to the image
-    img.src = './imgs/grass.png'
+    img.src = './imgs/submarin.gif'
 
     //create onload events for img to add it inside convas after loading
     img.addEventListener('load', function () {
@@ -197,6 +196,22 @@ function movePaddle(context1, paddle, paddleCanvas) {
 
         drawPaddle(context1, paddle)
     }
+
+    document.onkeyup = (e) => {
+        context1.clearRect(paddle.x, paddle.y, paddleCanvas.width, paddleCanvas.height)
+
+        if (e.key == 'ArrowRight' && paddle.x + paddle.width < paddleCanvas.width) {
+
+            paddle.x += paddle.step
+
+        } else if (e.key == 'ArrowLeft' && paddle.x > 0) {
+
+            paddle.x -= paddle.step
+
+        }
+
+        drawPaddle(context1, paddle)
+    }
 }
 
 //DRAW BALL
@@ -208,8 +223,10 @@ function drawBall(context2, ball) {
     context2.closePath();
 }
 
+
+
 /////////////////////////////
-/// DRAW DIFFRENTS BRICKS  //
+/// DRAW DIFFERENTS BRICKS  //
 /////////////////////////////
 
 //DRAW BOXES
@@ -274,6 +291,7 @@ function createDelphinBricks(ctx, brick, bricks) {
                         }
 
                     }, 300);
+
                     //SET A PROPERTIE TO THE BRICK TO STOP IT WHEN THE BALL CRASH THE BRICK
                     bricks[r][c].interval = brickInterval
 
@@ -429,7 +447,7 @@ function createDifferentsBricks(ctx, brick, bricks) {
 }
 
 //CREATE OF THE OCTOPUS
-function createOctopus(ctx, ball) {
+function createOctopus(ctx) {
     let imgOctopus = document.createElement('img')
     imgOctopus.src = './imgs/oct.png'
 
@@ -438,13 +456,6 @@ function createOctopus(ctx, ball) {
         ctx.drawImage(imgOctopus, 285, 80, 100, 100)
 
     })
-
-    //WHEN THE BALL CRASH THE OCTOPUS WILL BE SHOWEN BULLES
-    if ((ball.x + ball.radius > 380) && (ball.x - ball.radius < 380 + 100) && (ball.y + ball.radius > 100) && (ball.y - ball.radius < 100 + 100)) {
-
-        ball.dy = -ball.dy
-
-    }
 }
 
 //CREATE FISH NET
@@ -572,7 +583,7 @@ function ballBricksCollision(context3, brick, bricks, ball, gameOver1, youWon, l
             setTimeout(() => {
                 localStorage.setItem("mostRecentScore", SCORE);
                 return window.location.assign('./endPage.html')
-            }, 1000);
+            }, 2000);
         }
     });
 }
@@ -592,17 +603,12 @@ function resetBall(ball, paddle, ballCanvas) {
 
 
 
-
-
-
-
 ////////////////////////////
 ////    SHOW  MESSAGES    //
 ////////////////////////////
 //show the score and life
 function showGameStatus(context1, text, textX, textY, image_source, imgX, imgY, imgWidth, imgHeight) {
-    //draw text
-    //context1.fillStyle = '#FFF'
+    
     context1.font = '25px Germania One'
     context1.fillText(text, textX, textY)
 
@@ -631,14 +637,36 @@ function showYouWin(gameOver1, youWon) {
 function showYouLose(gameOver1, youLose) {
     gameOver1.style.display = 'block'
     youLose.style.display = 'block'
-    // container.style.display='none'
+   
 }
 
 
+function plotSine(ctx, x, xOffset, yOffset, width) {
+    
+    ctx.beginPath();
 
-/////////////////////////////////
-////// LOAD SOUNDS   /////////
-///////////////////////////////
-// function sound() {
+    var y = 0;
+    var amplitude = 5;
+    var frequency = 10;
+    //x IS THE Xposition
+    //yoffset IS THE Ypositon
+    //width LENGTH OF THE WAVE
+    while (x < width) { 
+        y = yOffset + amplitude * Math.sin((x + xOffset) / frequency);
+        ctx.lineTo(x, y);
+        x++;
 
-// }
+    }
+    ctx.strokeStyle = "#000099";
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+}
+
+function draw(ctx) {
+
+    plotSine(ctx, 285, step, 157, 385);
+
+    step += 1; //speed
+
+}
